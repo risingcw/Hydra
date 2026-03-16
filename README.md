@@ -1,7 +1,5 @@
 # 🐍 Hydra — GPU Private Key, Seed & Passphrase Recovery Tool
 
-EDIT WIF mode speed improvement
-
 > **CUDA-accelerated brute-force recovery for partial Bitcoin and Ethereum keys.**  
 > Designed for users who have lost part of a private key, WIF, BIP39 seed phrase, or BIP39 passphrase and need to recover access to their own wallet.
 
@@ -137,6 +135,8 @@ Place your candidate passphrases in `dictionary.txt`, one per line. On a bloom h
 ---
 
 ## Mode 4 — WIF (Wallet Import Format)
+
+EDIT WIF mode speed improvement
 
 Recover a compressed WIF private key (52 characters, starting with `K` or `L`) with some characters unknown. Use `#` for each unknown Base58 character.
 
