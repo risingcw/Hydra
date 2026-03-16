@@ -1,5 +1,7 @@
 # 🐍 Hydra — GPU Private Key, Seed & Passphrase Recovery Tool
 
+EDIT WIF mode speed improvement
+
 > **CUDA-accelerated brute-force recovery for partial Bitcoin and Ethereum keys.**  
 > Designed for users who have lost part of a private key, WIF, BIP39 seed phrase, or BIP39 passphrase and need to recover access to their own wallet.
 
@@ -288,7 +290,7 @@ python3 testhex.py && python3 testwif.py && python3 testseed.py && python3 testp
 | Hex | Bloom (BTC+ETH) | ~550 MK/s |
 | Seed | All modes | ~1,700,000 seeds/s |
 | Passphrase | All modes | ~100,000 pass/s |
-| WIF | All modes | ~900 MK/s |
+| WIF | All modes | ~2500 MK/s |
 
 ---
 
