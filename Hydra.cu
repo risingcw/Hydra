@@ -12,6 +12,14 @@
  *   BIP39 seed mode (unknown words = '#') :
  *     ./Hydra "word1 word2 # word4 # word6 word7 word8 word9 word10 word11 word12" 1AddressBTC
  *
+ * OUTPUT :
+ *   - "Not found in N candidates"
+ *   - "FOUND! Private key: 0x..."
+ *
+ * DEPENDENCIES :
+ *   - CUDA sm_120 (RTX 5060 Blackwell)
+ *   - OpenSSL (libssl-dev) for CPU-side ECC precomputation
+ *   - Standalone : ECC.h, Hash.h, Hash.cu, Gray.h, HydraCommon.h
  * ======================================================================================
  */
 
@@ -977,6 +985,7 @@ static void key_to_addresses(const uint8_t key[32],
 // 4. KEY RECONSTRUCTION FROM GRAY INDEX
 
 static void print_key(const uint8_t key[32]) {
+    std::cout << "0x";
     for (int i=0; i<32; i++) std::cout << std::hex << std::setw(2) << std::setfill('0') << (int)key[i];
     std::cout << std::dec << "\n";
 }
@@ -1233,17 +1242,10 @@ static int run_hex_mode(const std::string &mask_str, const std::string &addr_str
         // Bloom mode : already handled in loop (API check + reset on false positive)
         // We only reach here if victory=true (balance > 0) or direct address mode
         std::cout << "\n======== VICTORY ! KEY FOUND ==========================\n";
-		std::cout << "Private key : "; print_key(key);
-		if (target.type == TargetType::ETH)
-			std::cout << "  ETH         : " << addr_eth << "\n";
-		else if (target.type == TargetType::BLOOM_ETH)
-			std::cout << "  ETH         : " << addr_eth << "\n";
-		else if (!addr_str.empty() && addr_str.substr(0,3) == "bc1")
-			std::cout << "  BTC segwit  : " << addr_segwit << "\n";
-		else {
-			std::cout << "  BTC legacy  : " << addr_legacy << "\n";
-			std::cout << "  BTC segwit  : " << addr_segwit << "\n";
-		}
+        std::cout << "Private key : "; print_key(key);
+        std::cout << "  BTC legacy  : " << addr_legacy << "\n";
+        std::cout << "  BTC segwit  : " << addr_segwit << "\n";
+        std::cout << "  ETH         : " << addr_eth << "\n";
         std::cout << "=======================================================\n";
         {
             std::ostringstream pk_ss;
@@ -1693,6 +1695,9 @@ static int run_wif_mode(const std::string &wif_str, const std::string &addr_str)
     WifMask mask = {};
     if(!parse_wif_mask(wif_str, mask)) return 1;
 
+    // Précompute base + poids B58 → constant memory GPU
+    precompute_wif_b58(mask);
+
     // Alloue GPU
     int device = 0; cudaSetDevice(device);
     cudaDeviceProp prop; cudaGetDeviceProperties(&prop, device);
@@ -1828,6 +1833,7 @@ static int run_wif_mode(const std::string &wif_str, const std::string &addr_str)
         std::cout << "WIF         : " << wif_found << "\n";
         std::cout << "BTC legacy  : " << addr_legacy << "\n";
         std::cout << "BTC segwit  : " << addr_segwit << "\n";
+        std::cout << "ETH         : " << addr_eth << "\n";
         std::cout << "=======================================================\n";
         {
             std::string key_info = "*WIF:*\n`" + wif_found + "`";
